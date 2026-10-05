@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toko Buku Digital</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+    }
+
+    /* Header */
+    header {
+      background-color: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    /* Container Utama */
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    /* List Kartu Buku */
+    .katalog-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .buku-card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .sampul-placeholder {
+      color: #777;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+
+    .buku-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      color: #111;
+    }
+
+    .buku-card p {
+      color: #555;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+
+    .harga {
+      color: #d9534f;
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .btn-beli {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-beli:hover {
+      background-color: #219150;
+    }
+
+    /* Modal Pop-up Layout */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 10px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 15px;
+      color: #2c3e50;
+      font-size: 1.3rem;
+    }
+
+    /* Detail Pesanan Modal */
+    .detail-pesanan {
+      background-color: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      border-left: 4px solid #27ae60;
+    }
+
+    .detail-pesanan h4 {
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .detail-pesanan p {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .bayar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .bayar-section input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .total-bayar-box {
+      font-size: 1.1rem;
+      font-weight: bold;
+      background-color: #eef9f1;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: right;
+      color: #27ae60;
+    }
+
+    .bayar-section button {
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-top: 5px;
+    }
+
+    .bayar-section button:hover {
+      background-color: #1f6391;
+    }
+
+    .kembalian {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .sukses { background-color: #d4edda; color: #155724; }
+    .gagal { background-color: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Toko Buku Digital</h1>
+    <p>Temukan buku favoritmu di sini</p>
+  </header>
+
+  <div class="container">
+    <!-- List Buku (Menu Awal) -->
+    <div id="katalog" class="katalog-container"></div>
+  </div>
+
+  <!-- Pop-up Modal Menu Pembayaran -->
+  <div id="modal-pembayaran" class="modal-overlay">
+    <div class="modal-content">
+      <button class="close-btn" onclick="tutupModal()">&times;</button>
+      <h2>🛒 Kasir & Pembayaran</h2>
+      
+      <div class="detail-pesanan">
+        <h4 id="modal-judul">Judul Buku</h4>
+        <p>Harga Satuan: <strong id="modal-harga" style="color:#d9534f;">Rp 0</strong></p>
+      </div>
+
+      <div class="bayar-section">
+        <div class="form-group">
+          <label for="input-jumlah">Jumlah Eksemplar:</label>
+          <input type="number" id="input-jumlah" value="1" min="1" oninput="hitungTotal()">
+        </div>
+
+        <div class="total-bayar-box">
+          Total Tagihan: <span id="text-total">Rp 0</span>
+        </div>
+
+        <div class="form-group">
+          <label for="input-bayar">Nominal Uang Pembayaran (Rp):</label>
+          <input type="number" id="input-bayar" placeholder="Contoh: 100000">
+        </div>
+
+        <button onclick="prosesBayar()">Konfirmasi Pembayaran</button>
+      </div>
+
+      <div id="kembalian-info" class="kembalian" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const daftarBuku = [
+      {
+        id: 1,
+        judul: "Belajar HTML & CSS",
+        deskripsi: "Panduan dasar membuat website untuk pemula.",
+        harga: 75000
+      },
+      {
+        id: 2,
+        judul: "Pemrograman JavaScript",
+        deskripsi: "Kuasai logika interaktif web modern.",
+        harga: 95000
+      },
+      {
+        id: 3,
+        judul: "Panduan Belajar Node.js",
+        deskripsi: "Membangun backend web yang cepat dan terukur.",
+        harga: 85000
+      }
+    ];
+
+    let bukuDipilih = null;
+    let totalHargaBuku = 0;
+
+    function formatRupiah(angka) {
+      return "Rp " + angka.toLocaleString('id-ID');
+    }
+
+    // Render Katalog
+    function renderKatalog() {
+      const katalogEl = document.getElementById("katalog");
+      katalogEl.innerHTML = "";
+
+      daftarBuku.forEach((buku) => {
+        const card = document.createElement("div");
+        card.className = "buku-card";
+        card.innerHTML = `
+          <div class="sampul-placeholder">🖼 Sampul Buku ${buku.id}</div>
+          <h3>${buku.judul}</h3>
+          <p>${buku.deskripsi}</p>
+          <div class="harga">${formatRupiah(buku.harga)}</div>
+          <button class="btn-beli" onclick="bukaModal(${buku.id})">Beli Sekarang</button>
+        `;
+        katalogEl.appendChild(card);
+      });
+    }
+
+    // Buka Modal saat Beli Sekarang diklik
+    function bukaModal(idBuku) {
+      bukuDipilih = daftarBuku.find(b => b.id === idBuku);
+      
+      document.getElementById("modal-judul").innerText = bukuDipilih.judul;
+      document.getElementById("modal-harga").innerText = formatRupiah(bukuDipilih.harga);
+      
+      // Reset inputan
+      document.getElementById("input-jumlah").value = 1;
+      document.getElementById("input-bayar").value = "";
+      document.getElementById("kembalian-info").style.display = "none";
+      
+      hitungTotal();
+      document.getElementById("modal-pembayaran").style.display = "flex";
+    }
+
+    // Hitung total harga sesuai jumlah eksemplar
+    function hitungTotal() {
+      if (!bukuDipilih) return;
+      
+      let jumlah = parseInt(document.getElementById("input-jumlah").value);
+      if (isNaN(jumlah) || jumlah < 1) {
+        jumlah = 1;
+      }
+
+      totalHargaBuku = bukuDipilih.harga * jumlah;
+      document.getElementById("text-total").innerText = formatRupiah(totalHargaBuku);
+    }
+
+    // Tutup Modal
+    function tutupModal() {
+      document.getElementById("modal-pembayaran").style.display = "none";
+      bukuDipilih = null;
+    }
+
+    // Proses Bayar
+    function prosesBayar() {
+      if (!bukuDipilih) return;
+
+      const jumlah = parseInt(document.getElementById("input-jumlah").value);
+      const inputBayar = parseInt(document.getElementById("input-bayar").value);
+      const infoEl = document.getElementById("kembalian-info");
+
+      if (isNaN(jumlah) || jumlah < 1) {
+        alert("Jumlah eksemplar minimal 1.");
+        return;
+      }
+
+      if (isNaN(inputBayar) || inputBayar <= 0) {
+        alert("Masukkan nominal uang pembayaran dengan benar.");
+        return;
+      }
+
+      infoEl.style.display = "block";
+
+      if (inputBayar < totalHargaBuku) {
+        infoEl.className = "kembalian gagal";
+        infoEl.innerText = `Uang Kurang! Kurang ${formatRupiah(totalHargaBuku - inputBayar)}`;
+      } else {
+        const kembalian = inputBayar - totalHargaBuku;
+        
+        alert(`Transaksi Berhasil!\n\nBuku: ${bukuDipilih.judul}\nJumlah: ${jumlah} eksemplar\nTotal Tagihan: ${formatRupiah(totalHargaBuku)}\nBayar: ${formatRupiah(inputBayar)}\nKembalian: ${formatRupiah(kembalian)}`);
+
+        tutupModal();
+      }
+    }
+
+    renderKatalog();
+  </script>
+</body>
+</html>
